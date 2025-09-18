@@ -1,36 +1,143 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Medical Camp Management System
+
+A comprehensive web-based solution for managing medical camps with registration, testing, medicine dispensing, and reporting capabilities.
+
+## Features
+
+### ✅ Implemented
+- **Patient Registration**: Complete registration form with demographics, health metrics, and test selection
+- **Test Type Management**: CRUD interface for managing medical tests and their configurations
+- **Medicine Management**: Inventory management for medicines with stock tracking
+- **Prescription Printing**: A5 format prescription sheets with QR codes
+- **Satisfaction Rating**: Touch-optimized rating system for patient feedback
+- **Touch-Optimized UI**: Modern, responsive design for tablet/touch screen usage
+
+### 🚧 Planned Features
+- **QR Code Scanning**: Medicine dispensing with QR code scanning
+- **Lab Results Entry**: Interface for entering test results
+- **Report Generation**: Comprehensive patient reports with all test results
+- **Barcode Generation**: Test sample tracking with barcodes
+- **Advanced Analytics**: Camp statistics and reporting
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Database**: SQLite with Prisma ORM
+- **UI Components**: Headless UI, Heroicons
+- **QR/Barcode**: qrcode, jsbarcode libraries
+- **Deployment**: Vercel
 
 ## Getting Started
 
-First, run the development server:
+1. **Clone the repository**
+   ```bash
+   git clone [repository-url]
+   cd medical-camp-system
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. **Set up the database**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   npx tsx prisma/seed.ts
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+5. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+## Database Schema
 
-To learn more about Next.js, take a look at the following resources:
+The system uses the following main entities:
+- **Patients**: Patient demographic and health information
+- **Registrations**: Camp registration records with QR codes
+- **TestTypes**: Configurable medical tests
+- **Medicines**: Medicine inventory management
+- **TestResults**: Laboratory test results
+- **SatisfactionRatings**: Patient feedback
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Usage
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Patient Registration
+1. Navigate to "Patient Registration" from the main menu
+2. Fill in patient details (name, address, contact, DOB, gender)
+3. Enter health metrics (weight, height - BMI auto-calculated)
+4. Select required medical tests
+5. Submit to generate QR code and print prescription sheet
 
-## Deploy on Vercel
+### Test Type Management
+1. Go to "Test Type Master" to manage available tests
+2. Add new test types with configuration options:
+   - Result entry required
+   - Print sheet required
+   - Barcode required
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Medicine Management
+1. Access "Medicine Management" to maintain inventory
+2. Add medicines with dosage and stock information
+3. Monitor stock levels with low-stock warnings
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Satisfaction Rating
+1. Patients can rate their experience on the satisfaction page
+2. Touch-friendly star rating system (1-5 stars)
+3. Optional feedback comments
+
+## Deployment
+
+### Vercel Deployment
+1. **Prepare for deployment**
+   ```bash
+   npm run build
+   ```
+
+2. **Deploy to Vercel**
+   ```bash
+   npx vercel
+   ```
+
+3. **Set up environment variables** in Vercel dashboard:
+   - `DATABASE_URL`: SQLite database URL
+
+## Print Functionality
+
+The system generates A5-format printable documents:
+- **Prescription Sheets**: Patient details with QR code for doctor consultation
+- **Test Sheets**: For tests requiring printed data collection
+- **Barcode Labels**: For sample tracking (planned)
+
+## Touch Screen Optimization
+
+All interfaces are optimized for touch screens:
+- Large touch targets (minimum 44px)
+- Clear visual feedback
+- Simplified navigation
+- Responsive design for tablets
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Support
+
+For support and questions, please open an issue in the repository.
+
+---
+
+Built with ❤️ for improving healthcare accessibility in medical camps.

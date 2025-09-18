@@ -1,0 +1,117 @@
+// This is your Prisma schema file.
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Patient {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  contactNumber String
+  dateOfBirth DateTime
+  age         Int
+  gender      String
+  weight      Float
+  height      Float
+  bmi         Float
+  bloodPressure String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  registrations Registration[]
+}
+
+model TestType {
+  id                String   @id @default(cuid())
+  name              String   @unique
+  requiresResult    Boolean  @default(false)
+  requiresPrintSheet Boolean @default(false)
+  requiresBarcode   Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  registrationTests RegistrationTest[]
+  testResults       TestResult[]
+}
+
+model Medicine {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  dosage    String?
+  stock     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  medicineIssues MedicineIssue[]
+}
+
+model Registration {
+  id           String   @id @default(cuid())
+  patientId    String
+  qrCode       String   @unique
+  status       String   @default("registered") // registered, tests_done, medicines_issued, completed
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  patient           Patient            @relation(fields: [patientId], references: [id])
+  registrationTests RegistrationTest[]
+  medicineIssues    MedicineIssue[]
+  testResults       TestResult[]
+}
+
+model RegistrationTest {
+  id             String @id @default(cuid())
+  registrationId String
+  testTypeId     String
+  
+  registration Registration @relation(fields: [registrationId], references: [id])
+  testType     TestType     @relation(fields: [testTypeId], references: [id])
+  
+  @@unique([registrationId, testTypeId])
+}
+
+model TestResult {
+  id             String   @id @default(cuid())
+  registrationId String
+  testTypeId     String
+  result         String
+  normalRange    String?
+  status         String   @default("normal") // normal, abnormal, critical
+  enteredAt      DateTime @default(now())
+  enteredBy      String?
+  
+  registration Registration @relation(fields: [registrationId], references: [id])
+  testType     TestType     @relation(fields: [testTypeId], references: [id])
+  
+  @@unique([registrationId, testTypeId])
+}
+
+model MedicineIssue {
+  id             String   @id @default(cuid())
+  registrationId String
+  medicineId     String?
+  customMedicine String?
+  quantity       Int
+  dosage         String?
+  instructions   String?
+  issuedAt       DateTime @default(now())
+  issuedBy       String?
+  
+  registration Registration @relation(fields: [registrationId], references: [id])
+  medicine     Medicine?    @relation(fields: [medicineId], references: [id])
+}
+
+model SatisfactionRating {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5 stars
+  feedback  String?
+  createdAt DateTime @default(now())
+}
