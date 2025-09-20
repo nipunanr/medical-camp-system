@@ -43,10 +43,23 @@ export default function MedicinesPage() {
   const fetchMedicines = async () => {
     try {
       const response = await fetch('/api/medicines')
-      const data = await response.json()
-      setMedicines(data)
+      
+      if (response.ok) {
+        const data = await response.json()
+        // Ensure data is an array
+        if (Array.isArray(data)) {
+          setMedicines(data)
+        } else {
+          console.error('Expected array but got:', data)
+          setMedicines([])
+        }
+      } else {
+        console.error('Failed to fetch medicines:', response.status)
+        setMedicines([])
+      }
     } catch (error) {
       console.error('Error fetching medicines:', error)
+      setMedicines([])
     } finally {
       setLoading(false)
     }

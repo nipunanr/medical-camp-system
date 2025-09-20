@@ -4,7 +4,9 @@ import { prisma } from '@/lib/db'
 export async function GET() {
   try {
     const testTypes = await prisma.testType.findMany({
-      orderBy: { name: 'asc' }
+      orderBy: {
+        name: 'asc'
+      }
     })
     
     return NextResponse.json(testTypes)

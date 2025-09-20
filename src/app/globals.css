@@ -24,3 +24,60 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Enhanced Input Field Styling for Better Contrast and Readability */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+input[type="time"],
+input[type="password"],
+textarea,
+select {
+  @apply border-2 border-gray-300 rounded-lg px-4 py-3 text-gray-900 bg-white;
+  @apply focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none;
+  @apply shadow-sm transition-all duration-200;
+  @apply placeholder-gray-500;
+  font-size: 16px; /* Prevents zoom on mobile */
+  line-height: 1.5;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  @apply bg-white shadow-md;
+  color: #111827 !important; /* Force dark text */
+}
+
+/* Input labels for better contrast */
+label {
+  @apply text-gray-700 font-semibold mb-2 block;
+}
+
+/* Better styling for disabled inputs */
+input:disabled,
+textarea:disabled,
+select:disabled {
+  @apply bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed;
+}
+
+/* Error state styling */
+.input-error input,
+.input-error textarea,
+.input-error select {
+  @apply border-red-500 bg-red-50;
+}
+
+/* Success state styling */
+.input-success input,
+.input-success textarea,
+.input-success select {
+  @apply border-green-500 bg-green-50;
+}

@@ -25,7 +25,6 @@ interface TestType {
 
 interface Registration {
   id: string
-  qrCode: string
   patient: Patient
   registrationTests: Array<{
     testType: TestType
@@ -36,13 +35,22 @@ interface Registration {
 export default function PrescriptionPrint() {
   const params = useParams()
   const [registration, setRegistration] = useState<Registration | null>(null)
+  const [qrCode, setQrCode] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   const fetchRegistration = useCallback(async () => {
     try {
+      // Fetch registration data
       const response = await fetch(`/api/registration/${params.registrationId}`)
       const data = await response.json()
       setRegistration(data)
+      
+      // Fetch QR code dynamically
+      const qrResponse = await fetch(`/api/qr/${params.registrationId}`)
+      const qrData = await qrResponse.json()
+      if (qrData.success) {
+        setQrCode(qrData.qrCode)
+      }
     } catch (error) {
       console.error('Error fetching registration:', error)
     } finally {
@@ -188,8 +196,8 @@ export default function PrescriptionPrint() {
             </div>
             
             <div className="mb-3">
-              <label className="text-xs font-semibold text-gray-600 uppercase">Registration ID</label>
-              <p className="text-xs font-mono border-b border-gray-300 pb-1">{registration.id}</p>
+              <label className="text-xs font-semibold text-gray-600 uppercase">Patient ID</label>
+              <p className="text-xs font-mono border-b border-gray-300 pb-1">{patient.id}</p>
             </div>
           </div>
         </div>
@@ -249,10 +257,10 @@ export default function PrescriptionPrint() {
           </div>
           
           <div className="text-center">
-            {registration.qrCode && (
+            {qrCode && (
               <div>
-                <Image src={registration.qrCode} alt="QR Code" width={64} height={64} className="mx-auto mb-1" />
-                <p className="text-xs text-gray-600">Scan for Details</p>
+                <Image src={qrCode} alt="QR Code" width={64} height={64} className="mx-auto mb-1" />
+                <p className="text-xs text-gray-600">Patient ID</p>
               </div>
             )}
           </div>

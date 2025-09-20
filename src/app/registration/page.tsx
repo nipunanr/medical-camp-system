@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeftIcon, UserPlusIcon, PrinterIcon, HeartIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, UserPlusIcon, PrinterIcon, HeartIcon, CheckIcon } from '@heroicons/react/24/outline'
 
 interface TestType {
   id: string
@@ -43,6 +43,12 @@ export default function RegistrationPage() {
   const [age, setAge] = useState<number | null>(null)
   const [bmi, setBmi] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
+  const [registrationComplete, setRegistrationComplete] = useState(false)
+  const [qrCode, setQrCode] = useState<string | null>(null)
+  const [registrationResult, setRegistrationResult] = useState<{
+    registrationId: string
+    patientId: string // This is now the readable ID like R250920001
+  } | null>(null)
 
   useEffect(() => {
     fetchTestTypes()
@@ -119,9 +125,18 @@ export default function RegistrationPage() {
 
       if (response.ok) {
         const result = await response.json()
+        setRegistrationResult(result)
+        setRegistrationComplete(true)
+        
+        // Fetch QR code for display
+        const qrResponse = await fetch(`/api/qr/${result.registrationId}`)
+        const qrData = await qrResponse.json()
+        if (qrData.success) {
+          setQrCode(qrData.qrCode)
+        }
+        
         // Print prescription sheet and other required documents
         await printDocuments(result.registrationId)
-        router.push('/')
       } else {
         throw new Error('Registration failed')
       }
@@ -208,16 +223,16 @@ export default function RegistrationPage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-10 border border-red-100">
-          {/* Personal Information */}
-          <div className="mb-10">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                <HeartIcon className="h-5 w-5 text-white" />
+        {!registrationComplete ? (
+          <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-10 border border-red-100">
+            {/* Personal Information */}
+            <div className="mb-10">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                  <HeartIcon className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
-            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <label className="block text-sm font-semibold text-gray-800 mb-3">Full Name *</label>
@@ -415,6 +430,84 @@ export default function RegistrationPage() {
             </button>
           </div>
         </form>
+        ) : (
+          /* Registration Success Screen */
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl p-10 border border-green-100 text-center">
+            <div className="mb-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckIcon className="h-10 w-10 text-white" />
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Registration Successful!</h2>
+              <p className="text-lg text-gray-600 mb-8">Patient has been successfully registered for the medical camp.</p>
+            </div>
+
+            {/* Patient ID Display */}
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-8 mb-8">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Patient ID</h3>
+              <div className="text-5xl font-bold text-blue-600 font-mono mb-4">
+                {registrationResult?.patientId}
+              </div>
+              <p className="text-gray-600">This unique ID serves as the QR code for all medical camp services</p>
+              
+              {/* QR Code Display */}
+              {qrCode && (
+                <div className="mt-6 p-4 bg-white rounded-lg border border-gray-200 inline-block">
+                  <img 
+                    src={qrCode} 
+                    alt="Patient QR Code" 
+                    className="w-32 h-32 mx-auto"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Patient Details Summary */}
+            <div className="bg-gray-50 rounded-xl p-6 mb-8 text-left">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Patient Summary</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div><strong>Name:</strong> {formData.name}</div>
+                <div><strong>Contact:</strong> {formData.contactNumber}</div>
+                <div><strong>Age:</strong> {age} years</div>
+                <div><strong>Gender:</strong> {formData.gender}</div>
+                <div><strong>Weight:</strong> {formData.weight} kg</div>
+                <div><strong>Height:</strong> {formData.height} cm</div>
+                <div><strong>BMI:</strong> {bmi}</div>
+                <div><strong>Blood Pressure:</strong> {formData.bloodPressure || 'Not recorded'}</div>
+              </div>
+            </div>
+
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={() => {
+                  setRegistrationComplete(false)
+                  setRegistrationResult(null)
+                  setFormData({
+                    name: '',
+                    address: '',
+                    contactNumber: '',
+                    dateOfBirth: '',
+                    gender: '',
+                    weight: '',
+                    height: '',
+                    bloodPressure: '',
+                    selectedTests: []
+                  })
+                  setAge(null)
+                  setBmi(null)
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                Register Another Patient
+              </button>
+              <Link
+                href="/"
+                className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+              >
+                Back to Dashboard
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

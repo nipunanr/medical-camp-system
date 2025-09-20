@@ -36,12 +36,46 @@ export default function SettingsPage() {
     notifications: true
   })
 
+  const [maintenanceMode, setMaintenanceMode] = useState(() => {
+    // Read from environment variable
+    return process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true'
+  })
+
   const [saveMessage, setSaveMessage] = useState('')
 
   const handleSaveSettings = () => {
     // Simulate saving settings
     setSaveMessage('Settings saved successfully!')
     setTimeout(() => setSaveMessage(''), 3000)
+  }
+
+  const handleMaintenanceToggle = async () => {
+    try {
+      const newMode = !maintenanceMode
+      
+      // Call API to update maintenance mode
+      const response = await fetch('/api/maintenance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ maintenanceMode: newMode }),
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        setMaintenanceMode(newMode)
+        setSaveMessage(result.message)
+      } else {
+        setSaveMessage('Error updating maintenance mode: ' + (result.error || 'Unknown error'))
+      }
+      
+      setTimeout(() => setSaveMessage(''), 5000)
+    } catch (error) {
+      setSaveMessage('Error toggling maintenance mode')
+      setTimeout(() => setSaveMessage(''), 3000)
+    }
   }
 
   return (
@@ -256,6 +290,31 @@ export default function SettingsPage() {
           <div className="flex items-center mb-6">
             <ShieldCheckIcon className="h-8 w-8 text-red-600 mr-3" />
             <h2 className="text-xl font-semibold text-gray-800">System Actions</h2>
+          </div>
+          
+          {/* Maintenance Mode Toggle */}
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-orange-800">Maintenance Mode</h3>
+                <p className="text-sm text-orange-600">
+                  {maintenanceMode 
+                    ? 'System is currently in maintenance mode. Users will see the maintenance page.'
+                    : 'System is running normally. Users can access all features.'
+                  }
+                </p>
+              </div>
+              <button
+                onClick={handleMaintenanceToggle}
+                className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                  maintenanceMode
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-orange-600 hover:bg-orange-700 text-white'
+                }`}
+              >
+                {maintenanceMode ? 'Disable Maintenance' : 'Enable Maintenance'}
+              </button>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

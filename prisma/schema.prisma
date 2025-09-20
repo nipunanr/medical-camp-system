@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Patient {
-  id          String   @id @default(cuid())
+  id          String   @id // Readable ID like R250920001
   name        String
   address     String
   contactNumber String
@@ -55,8 +55,7 @@ model Medicine {
 
 model Registration {
   id           String   @id @default(cuid())
-  patientId    String
-  qrCode       String   @unique
+  patientId    String   // References Patient.id (readable ID)
   status       String   @default("registered") // registered, tests_done, medicines_issued, completed
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -114,4 +113,13 @@ model SatisfactionRating {
   rating    Int      // 1-5 stars
   feedback  String?
   createdAt DateTime @default(now())
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  category  String?  // general, medical, system, etc.
+  updatedAt DateTime @updatedAt
+  updatedBy String?
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   ArrowLeftIcon, 
   ChartBarIcon, 
@@ -10,48 +10,159 @@ import {
   UsersIcon,
   BeakerIcon,
   HeartIcon,
-  StarIcon
+  StarIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 
 export default function ReportsPage() {
-  const [selectedReportType, setSelectedReportType] = useState<string | null>(null)
-  const [dateRange, setDateRange] = useState({
-    start: '',
-    end: ''
+  const [showHourlyAnalysis, setShowHourlyAnalysis] = useState(true)
+  const [satisfactionData, setSatisfactionData] = useState<any[]>([])
+  const [showSatisfactionReport, setShowSatisfactionReport] = useState(false)
+  const [stats, setStats] = useState({
+    totalPatients: 0,
+    testsCompleted: 0,
+    medicinesDispensed: 0,
+    avgSatisfaction: 0,
+    todayRegistrations: 0,
+    pendingResults: 0
   })
 
-  // Mock data for demonstration
-  const mockStats = {
-    totalPatients: 156,
-    testsCompleted: 342,
-    medicinesDispensed: 89,
-    avgSatisfaction: 4.6,
-    todayRegistrations: 23,
-    pendingResults: 12
+  // Fetch stats data
+  useEffect(() => {
+    fetchStats()
+  }, [])
+
+  const fetchStats = async () => {
+    try {
+      // Fetch various statistics from APIs
+      const [
+        registrationsResponse,
+        testResultsResponse,
+        medicinesResponse,
+        satisfactionResponse,
+        pendingResultsResponse
+      ] = await Promise.all([
+        fetch('/api/registration'),
+        fetch('/api/test-results?limit=1000'),
+        fetch('/api/medicines'),
+        fetch('/api/satisfaction'),
+        fetch('/api/test-results/pending')
+      ])
+
+      let totalPatients = 0
+      let testsCompleted = 0
+      let medicinesDispensed = 0
+      let avgSatisfaction = 0
+      let todayRegistrations = 0
+      let pendingResults = 0
+
+      // Count registrations
+      if (registrationsResponse.ok) {
+        const registrations = await registrationsResponse.json()
+        totalPatients = registrations.length || 0
+        
+        // Count today's registrations
+        const today = new Date().toDateString()
+        todayRegistrations = registrations.filter((reg: any) => 
+          new Date(reg.createdAt).toDateString() === today
+        ).length || 0
+      }
+
+      // Count completed tests
+      if (testResultsResponse.ok) {
+        const testResults = await testResultsResponse.json()
+        testsCompleted = testResults.testResults?.length || 0
+      }
+
+      // Count medicines (stock)
+      if (medicinesResponse.ok) {
+        const medicines = await medicinesResponse.json()
+        medicinesDispensed = medicines.reduce((total: number, med: any) => total + (med.stock || 0), 0)
+      }
+
+      // Calculate average satisfaction
+      if (satisfactionResponse.ok) {
+        const satisfaction = await satisfactionResponse.json()
+        if (satisfaction.length > 0) {
+          avgSatisfaction = satisfaction.reduce((sum: number, item: any) => sum + item.rating, 0) / satisfaction.length
+        }
+      }
+
+      // Count pending results
+      if (pendingResultsResponse.ok) {
+        const pending = await pendingResultsResponse.json()
+        pendingResults = pending.length || 0
+      }
+
+      setStats({
+        totalPatients,
+        testsCompleted,
+        medicinesDispensed: Math.round(medicinesDispensed),
+        avgSatisfaction: Math.round(avgSatisfaction * 10) / 10,
+        todayRegistrations,
+        pendingResults
+      })
+    } catch (error) {
+      console.error('Error fetching stats:', error)
+      // Fallback to default values
+      setStats({
+        totalPatients: 0,
+        testsCompleted: 0,
+        medicinesDispensed: 0,
+        avgSatisfaction: 0,
+        todayRegistrations: 0,
+        pendingResults: 0
+      })
+    }
   }
 
+  // Sample hourly data for analytics (7AM to 5PM) - this would be replaced with actual data
+  const [hourlyData, setHourlyData] = useState([
+    { hour: '7AM', patients: 0, tests: 0, medicines: 0 },
+    { hour: '8AM', patients: 0, tests: 0, medicines: 0 },
+    { hour: '9AM', patients: 0, tests: 0, medicines: 0 },
+    { hour: '10AM', patients: 0, tests: 0, medicines: 0 },
+    { hour: '11AM', patients: 0, tests: 0, medicines: 0 },
+    { hour: '12PM', patients: 0, tests: 0, medicines: 0 },
+    { hour: '1PM', patients: 0, tests: 0, medicines: 0 },
+    { hour: '2PM', patients: 0, tests: 0, medicines: 0 },
+    { hour: '3PM', patients: 0, tests: 0, medicines: 0 },
+    { hour: '4PM', patients: 0, tests: 0, medicines: 0 },
+    { hour: '5PM', patients: 0, tests: 0, medicines: 0 },
+  ])
+
+  // Fetch hourly data (this would be replaced with actual API calls)
+  const fetchHourlyData = async () => {
+    try {
+      // This would fetch actual hourly analytics data
+      // For now, using simulated data based on current hour
+      const currentHour = new Date().getHours()
+      const updatedData = hourlyData.map((item, index) => {
+        const hourValue = index + 7 // 7AM = index 0
+        if (hourValue <= currentHour) {
+          return {
+            ...item,
+            patients: Math.floor(Math.random() * 20) + 5,
+            tests: Math.floor(Math.random() * 15) + 3,
+            medicines: Math.floor(Math.random() * 25) + 8
+          }
+        }
+        return item
+      })
+      setHourlyData(updatedData)
+    } catch (error) {
+      console.error('Error fetching hourly data:', error)
+    }
+  }
+
+  // Fetch hourly data when component mounts
+  useEffect(() => {
+    fetchHourlyData()
+  }, [])
+
   const reportTypes = [
-    {
-      id: 'daily',
-      title: 'Daily Summary Report',
-      description: 'Summary of today&apos;s activities and patient registrations',
-      icon: ChartBarIcon,
-      color: 'bg-blue-500'
-    },
-    {
-      id: 'patient-list',
-      title: 'Patient List Report',
-      description: 'Complete list of registered patients with details',
-      icon: UsersIcon,
-      color: 'bg-green-500'
-    },
-    {
-      id: 'test-results',
-      title: 'Test Results Report',
-      description: 'Summary of all completed and pending test results',
-      icon: BeakerIcon,
-      color: 'bg-yellow-500'
-    },
     {
       id: 'satisfaction',
       title: 'Satisfaction Report',
@@ -61,10 +172,20 @@ export default function ReportsPage() {
     }
   ]
 
-  const handleGenerateReport = (reportType: string) => {
-    setSelectedReportType(reportType)
-    // In a real app, this would generate and download the report
-    alert(`Generating ${reportTypes.find(r => r.id === reportType)?.title}...`)
+  const handleGenerateReport = async (reportType: string) => {
+    if (reportType === 'satisfaction') {
+      try {
+        const response = await fetch('/api/satisfaction')
+        if (response.ok) {
+          const data = await response.json()
+          setSatisfactionData(data)
+          setShowSatisfactionReport(true)
+        }
+      } catch (error) {
+        console.error('Error fetching satisfaction data:', error)
+        alert('Error loading satisfaction report')
+      }
+    }
   }
 
   const handlePrintReport = () => {
@@ -97,7 +218,7 @@ export default function ReportsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Patients</p>
-                <p className="text-2xl font-bold text-gray-900">{mockStats.totalPatients}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalPatients}</p>
               </div>
             </div>
           </div>
@@ -109,7 +230,7 @@ export default function ReportsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Tests Completed</p>
-                <p className="text-2xl font-bold text-gray-900">{mockStats.testsCompleted}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.testsCompleted}</p>
               </div>
             </div>
           </div>
@@ -121,7 +242,7 @@ export default function ReportsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Medicines Dispensed</p>
-                <p className="text-2xl font-bold text-gray-900">{mockStats.medicinesDispensed}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.medicinesDispensed}</p>
               </div>
             </div>
           </div>
@@ -133,7 +254,7 @@ export default function ReportsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Avg Satisfaction</p>
-                <p className="text-2xl font-bold text-gray-900">{mockStats.avgSatisfaction}/5</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.avgSatisfaction}/5</p>
               </div>
             </div>
           </div>
@@ -145,7 +266,7 @@ export default function ReportsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Today&apos;s Registrations</p>
-                <p className="text-2xl font-bold text-gray-900">{mockStats.todayRegistrations}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.todayRegistrations}</p>
               </div>
             </div>
           </div>
@@ -157,38 +278,67 @@ export default function ReportsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Pending Results</p>
-                <p className="text-2xl font-bold text-gray-900">{mockStats.pendingResults}</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.pendingResults}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Date Range Filter */}
+        {/* Hourly Analytics Dashboard */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6">Report Date Range</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-              <input
-                type="date"
-                value={dateRange.start}
-                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent touch-manipulation text-lg"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-              <input
-                type="date"
-                value={dateRange.end}
-                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent touch-manipulation text-lg"
-              />
-            </div>
+          <div 
+            className="flex items-center justify-between cursor-pointer mb-6"
+            onClick={() => setShowHourlyAnalysis(!showHourlyAnalysis)}
+          >
+            <h2 className="text-xl font-semibold text-gray-800">Hourly Progress Analytics (7AM - 5PM)</h2>
+            {showHourlyAnalysis ? (
+              <ChevronDownIcon className="h-6 w-6 text-gray-500" />
+            ) : (
+              <ChevronRightIcon className="h-6 w-6 text-gray-500" />
+            )}
           </div>
+          
+          {showHourlyAnalysis && (
+            <div className="space-y-4">
+            {hourlyData.map((data, index) => {
+              const maxValue = Math.max(...hourlyData.map(d => Math.max(d.patients, d.tests, d.medicines)));
+              const patientWidth = (data.patients / maxValue) * 100;
+              const testWidth = (data.tests / maxValue) * 100;
+              const medicineWidth = (data.medicines / maxValue) * 100;
+              const currentHour = new Date().getHours();
+              const isCurrentHour = (index + 7) === currentHour;
+              
+              return (
+                <div key={data.hour} className={`p-4 rounded-lg ${isCurrentHour ? 'bg-yellow-50 border-2 border-yellow-300' : 'bg-gray-50'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`font-semibold ${isCurrentHour ? 'text-yellow-800' : 'text-gray-700'}`}>
+                      {data.hour} {isCurrentHour && '(Current)'}
+                    </span>
+                    <div className="flex space-x-4 text-sm">
+                      <span className="text-red-600">Patients: {data.patients}</span>
+                      <span className="text-green-600">Tests: {data.tests}</span>
+                      <span className="text-blue-600">Medicines: {data.medicines}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-red-500 rounded-full transition-all duration-500" style={{width: `${patientWidth}%`}}></div>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-green-500 rounded-full transition-all duration-500" style={{width: `${testWidth}%`}}></div>
+                    </div>
+                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{width: `${medicineWidth}%`}}></div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            </div>
+          )}
         </div>
 
-        {/* Report Types */}
+        {/* Available Reports */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-6">Available Reports</h2>
           
@@ -238,6 +388,107 @@ export default function ReportsPage() {
             </p>
           </div>
         </div>
+
+        {/* Satisfaction Report Display */}
+        {showSatisfactionReport && satisfactionData.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-xl p-8 mt-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <StarIcon className="h-8 w-8 text-pink-600 mr-3" />
+                <h2 className="text-xl font-semibold text-gray-800">Patient Satisfaction Report</h2>
+              </div>
+              <button
+                onClick={() => setShowSatisfactionReport(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Summary Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-6 text-center">
+                <h3 className="text-lg font-semibold text-green-800 mb-2">Average Rating</h3>
+                <p className="text-3xl font-bold text-green-600">
+                  {(satisfactionData.reduce((sum, item) => sum + item.rating, 0) / satisfactionData.length).toFixed(1)}/5
+                </p>
+              </div>
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6 text-center">
+                <h3 className="text-lg font-semibold text-blue-800 mb-2">Total Responses</h3>
+                <p className="text-3xl font-bold text-blue-600">{satisfactionData.length}</p>
+              </div>
+            </div>
+
+            {/* Rating Distribution */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Rating Distribution</h3>
+              <div className="space-y-3">
+                {[5, 4, 3, 2, 1].map((rating) => {
+                  const count = satisfactionData.filter(item => item.rating === rating).length
+                  const percentage = satisfactionData.length > 0 ? (count / satisfactionData.length) * 100 : 0
+                  return (
+                    <div key={rating} className="flex items-center">
+                      <div className="flex items-center w-20">
+                        <span className="text-sm font-medium text-gray-700 mr-2">{rating}</span>
+                        <StarIcon className="h-4 w-4 text-yellow-400 fill-current" />
+                      </div>
+                      <div className="flex-1 mx-4">
+                        <div className="bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-yellow-400 h-2 rounded-full transition-all duration-500"
+                            style={{width: `${percentage}%`}}
+                          ></div>
+                        </div>
+                      </div>
+                      <div className="w-16 text-right">
+                        <span className="text-sm font-medium text-gray-600">{count}</span>
+                        <span className="text-xs text-gray-500 ml-1">({percentage.toFixed(1)}%)</span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Comments Section */}
+            {satisfactionData.filter(item => item.feedback && item.feedback.trim()).length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Patient Comments</h3>
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {satisfactionData
+                    .filter(item => item.feedback && item.feedback.trim())
+                    .map((item, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center">
+                            <div className="flex">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <StarIcon
+                                  key={star}
+                                  className={`h-4 w-4 ${
+                                    star <= item.rating 
+                                      ? 'text-yellow-400 fill-current' 
+                                      : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <span className="ml-2 text-sm font-medium text-gray-600">
+                              {item.rating}/5
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {new Date(item.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 text-sm leading-relaxed">{item.feedback}</p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { 
   UserPlusIcon, 
   ClipboardDocumentCheckIcon, 
@@ -9,7 +12,9 @@ import {
   StarIcon,
   Cog6ToothIcon,
   SparklesIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  MagnifyingGlassIcon,
+  PrinterIcon
 } from '@heroicons/react/24/outline'
 
 const menuItems = [
@@ -20,6 +25,14 @@ const menuItems = [
     href: '/registration',
     gradient: 'from-blue-500 to-blue-700',
     hoverGradient: 'hover:from-blue-600 hover:to-blue-800',
+  },
+  {
+    title: 'Update Patient Details',
+    description: 'Search and update existing patient information',
+    icon: MagnifyingGlassIcon,
+    href: '/patient-update',
+    gradient: 'from-cyan-500 to-blue-600',
+    hoverGradient: 'hover:from-cyan-600 hover:to-blue-700',
   },
   {
     title: 'Test Type Master',
@@ -54,6 +67,14 @@ const menuItems = [
     hoverGradient: 'hover:from-amber-600 hover:to-orange-700',
   },
   {
+    title: 'Lab Report Printing',
+    description: 'Print official laboratory reports for patients',
+    icon: PrinterIcon,
+    href: '/lab-report-printing',
+    gradient: 'from-teal-500 to-cyan-600',
+    hoverGradient: 'hover:from-teal-600 hover:to-cyan-700',
+  },
+  {
     title: 'Reports & Analytics',
     description: 'Generate comprehensive reports and analytics dashboard',
     icon: ChartBarIcon,
@@ -80,111 +101,168 @@ const menuItems = [
 ]
 
 export default function HomePage() {
+  // State for real-time clock and data
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [completedTests, setCompletedTests] = useState(0);
+  const [medicinesDispensed, setMedicinesDispensed] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // Update clock every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Fetch actual data from database
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/registration', {
+          cache: 'no-store'
+        });
+        
+        if (response.ok) {
+          const registrations = await response.json();
+          setTotalPatients(registrations.length || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const currentHour = currentTime.getHours();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
-      {/* Modern Header with Church Branding */}
-      <header className="relative overflow-hidden bg-gradient-to-r from-red-600 via-red-700 to-red-800">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            {/* Church Logo Placeholder */}
-            <div className="w-24 h-24 mx-auto mb-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl border-4 border-white/30">
-              <div className="text-white font-bold text-2xl">SC</div>
+      {/* Compact Header Row */}
+      <header className="bg-white shadow-lg border-b-4 border-red-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo and Title */}
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center shadow-lg">
+                <div className="text-white font-bold text-lg">SC</div>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">St. Sebastian&apos;s Church</h1>
+                <p className="text-sm text-red-600 font-semibold">Free Medical Camp - Today Only (7AM - 5PM)</p>
+              </div>
             </div>
             
-            <h1 className="text-6xl font-bold text-white mb-4 tracking-tight">
-              St. Sebastian&apos;s Church
-            </h1>
-            <h2 className="text-3xl font-semibold text-red-100 mb-6">
-              Medical Camp System
-            </h2>
-            <p className="text-xl text-red-100/90 max-w-4xl mx-auto leading-relaxed">
-              Modern digital solution for comprehensive medical camp management - 
-              serving our community with advanced healthcare technology and compassionate care
-            </p>
-            
             {/* Quick Stats */}
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
-              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/30">
-                <div className="flex items-center justify-center mb-3">
-                  <ShieldCheckIcon className="h-8 w-8 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-white">100%</div>
-                <div className="text-red-100 text-sm">Secure & Reliable</div>
+            <div className="hidden md:flex items-center space-x-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600">{totalPatients}</div>
+                <div className="text-xs text-gray-600 uppercase">Patients</div>
               </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/30">
-                <div className="flex items-center justify-center mb-3">
-                  <SparklesIcon className="h-8 w-8 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-white">Modern</div>
-                <div className="text-red-100 text-sm">Touch-Optimized UI</div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{completedTests}</div>
+                <div className="text-xs text-gray-600 uppercase">Tests</div>
               </div>
-              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/30">
-                <div className="flex items-center justify-center mb-3">
-                  <HeartIcon className="h-8 w-8 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-white">Care</div>
-                <div className="text-red-100 text-sm">Community Focused</div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{medicinesDispensed}</div>
+                <div className="text-xs text-gray-600 uppercase">Medicines</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-bold text-gray-800">{currentTime.toLocaleTimeString()}</div>
+                <div className="text-xs text-gray-600 uppercase">Current Time</div>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="relative py-16">
+      {/* Dashboard Content */}
+      <main className="relative py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Title */}
-          <div className="text-center mb-16">
-            <h3 className="text-4xl font-bold text-gray-900 mb-4">
-              Medical Camp Services
-            </h3>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Access all medical camp functions through our intuitive dashboard
-            </p>
-          </div>
-
-          {/* Modern Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {menuItems.map((item, index) => (
-              <Link
-                key={index}
-                href={item.href}
-                className="group relative overflow-hidden"
-              >
-                <div className={`bg-gradient-to-br ${item.gradient} ${item.hoverGradient} rounded-3xl p-8 text-white shadow-xl transform transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:-translate-y-2`}>
-                  {/* Decorative Elements */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16 transition-transform duration-500 group-hover:scale-150"></div>
-                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12 transition-transform duration-500 group-hover:scale-125"></div>
-                  
-                  <div className="relative flex flex-col items-center text-center space-y-6">
-                    {/* Icon Container */}
-                    <div className="p-6 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg border border-white/30 transition-transform duration-300 group-hover:scale-110">
-                      <item.icon className="h-12 w-12" />
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="space-y-3">
-                      <h3 className="text-xl font-bold leading-tight">{item.title}</h3>
-                      <p className="text-sm opacity-90 leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                    
-                    {/* Arrow Indicator */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
+          
+          {/* Hourly Analytics Dashboard */}
+          <div className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Today&apos;s Medical Camp Dashboard</h2>
+            
+            {/* Analytics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Patients</p>
+                    <p className="text-3xl font-bold text-red-600">
+                      {loading ? '...' : totalPatients}
+                    </p>
+                    <p className="text-sm text-gray-500">{totalPatients > 0 ? 'Live count' : 'No registrations yet'}</p>
+                  </div>
+                  <div className="p-3 bg-red-100 rounded-full">
+                    <UserPlusIcon className="h-8 w-8 text-red-600" />
                   </div>
                 </div>
-              </Link>
-            ))}
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Tests Completed</p>
+                    <p className="text-3xl font-bold text-green-600">
+                      {loading ? '...' : completedTests}
+                    </p>
+                    <p className="text-sm text-gray-500">{completedTests > 0 ? 'Results entered' : 'No test results yet'}</p>
+                  </div>
+                  <div className="p-3 bg-green-100 rounded-full">
+                    <BeakerIcon className="h-8 w-8 text-green-600" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Medicines Dispensed</p>
+                    <p className="text-3xl font-bold text-blue-600">
+                      {loading ? '...' : medicinesDispensed}
+                    </p>
+                    <p className="text-sm text-gray-500">{medicinesDispensed > 0 ? 'Medicines issued' : 'No medicines dispensed yet'}</p>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-full">
+                    <HeartIcon className="h-8 w-8 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+
+          {/* Medical Camp Services Section */}
+          <div className="mb-12">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Medical Camp Services</h3>
+            <p className="text-lg text-gray-600 mb-8">Quick access to all medical camp functions</p>
+            
+            {/* Compact Service Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {menuItems.map((item, index) => (
+                <Link
+                  key={index}
+                  href={item.href}
+                  className="group bg-white rounded-xl shadow-lg p-4 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  <div className="text-center">
+                    <div className={`w-12 h-12 mx-auto mb-3 bg-gradient-to-br ${item.gradient} rounded-lg flex items-center justify-center`}>
+                      <item.icon className="h-6 w-6 text-white" />
+                    </div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-1">{item.title}</h4>
+                    <p className="text-xs text-gray-600 leading-tight">{item.description}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </main>
@@ -192,16 +270,16 @@ export default function HomePage() {
       {/* Modern Footer */}
       <footer className="bg-gradient-to-r from-gray-900 via-red-900 to-gray-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-800/20 to-transparent"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-6 bg-white/20 rounded-full flex items-center justify-center">
-              <div className="text-white font-bold text-lg">SC</div>
+            <div className="w-12 h-12 mx-auto mb-4 bg-white/20 rounded-full flex items-center justify-center">
+              <div className="text-white font-bold text-sm">SC</div>
             </div>
-            <h4 className="text-2xl font-bold mb-2">St. Sebastian&apos;s Church, Moragoda</h4>
-            <p className="text-gray-300 mb-6">Medical Camp Management System v2.0</p>
-            <div className="border-t border-white/20 pt-6">
-              <p className="text-sm text-gray-400">
-                Serving our community with modern healthcare technology • © 2025 All rights reserved
+            <h4 className="text-lg font-bold mb-1">St. Sebastian&apos;s Church, Moragoda</h4>
+            <p className="text-gray-300 text-sm mb-4">Medical Camp Management System v2.0</p>
+            <div className="border-t border-white/20 pt-4">
+              <p className="text-xs text-gray-400">
+                Free Medical Camp Today • © 2025 All rights reserved
               </p>
             </div>
           </div>

@@ -41,20 +41,57 @@ A comprehensive web-based solution for managing medical camps with registration,
    npm install
    ```
 
-3. **Set up the database**
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
+   Edit `.env.local` and configure your database connection and other settings.
+
+4. **Set up the database**
    ```bash
    npx prisma generate
    npx prisma db push
    npx tsx prisma/seed.ts
    ```
 
-4. **Run the development server**
+5. **Run the development server**
    ```bash
    npm run dev
    ```
 
-5. **Open your browser**
+6. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+## Environment Configuration
+
+The system uses environment variables for configuration. Copy `.env.example` to `.env.local` and update the values:
+
+### Required Variables
+- `DATABASE_URL`: PostgreSQL/Supabase database connection string
+- `DIRECT_URL`: Direct database connection (for Prisma migrations)
+
+### Optional Variables
+- `NEXT_PUBLIC_MAINTENANCE_MODE`: Enable/disable maintenance mode (`true`/`false`)
+- `NEXT_PUBLIC_CAMP_NAME`: Name of your medical camp
+- `NEXT_PUBLIC_CAMP_LOCATION`: Camp location
+- `NEXT_PUBLIC_CAMP_ORGANIZER`: Organizing institution
+
+## Maintenance Mode
+
+The system includes a built-in maintenance mode feature:
+
+### Enabling Maintenance Mode
+1. **Via Settings**: Go to `/settings` → System Actions → Toggle "Enable Maintenance"
+2. **Via Environment**: Set `NEXT_PUBLIC_MAINTENANCE_MODE=true` in `.env.local`
+3. **Via API**: POST to `/api/maintenance` with `{"maintenanceMode": true}`
+
+### Features
+- Professional maintenance page with camp branding
+- Automatic redirect for all users except maintenance page
+- Real-time clock and contact information
+- Easy toggle through admin interface
+
+For detailed maintenance mode documentation, see [MAINTENANCE_MODE.md](./MAINTENANCE_MODE.md).
 
 ## Database Schema
 
@@ -74,6 +111,13 @@ The system uses the following main entities:
 3. Enter health metrics (weight, height - BMI auto-calculated)
 4. Select required medical tests
 5. Submit to generate QR code and print prescription sheet
+   - QR codes contain the Registration ID for easy scanning and patient lookup
+
+### QR Code Scanning
+1. **Medicine Issue**: Scan QR code or enter Registration ID to view patient prescriptions
+2. **Lab Results**: Scan QR code or enter Registration ID to enter test results
+3. **Patient Update**: Search by Registration ID to find and update patient information
+4. All QR codes contain the Registration ID for consistent patient identification
 
 ### Test Type Management
 1. Go to "Test Type Master" to manage available tests
@@ -106,7 +150,19 @@ The system uses the following main entities:
    ```
 
 3. **Set up environment variables** in Vercel dashboard:
-   - `DATABASE_URL`: SQLite database URL
+   - `DATABASE_URL`: PostgreSQL/Supabase database URL
+   - `DIRECT_URL`: Direct database connection for migrations
+   - `NEXT_PUBLIC_MAINTENANCE_MODE`: Set to `false` for production
+   - Add other variables from `.env.example` as needed
+
+### Other Hosting Platforms
+For other hosting platforms, ensure you:
+1. Set all required environment variables
+2. Run database migrations: `npx prisma db push`
+3. Build the application: `npm run build`
+4. Start the production server: `npm start`
+
+**Important**: Remember to restart your application server when changing environment variables like `NEXT_PUBLIC_MAINTENANCE_MODE`.
 
 ## Print Functionality
 

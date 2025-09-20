@@ -46,10 +46,23 @@ export default function TestTypesPage() {
   const fetchTestTypes = async () => {
     try {
       const response = await fetch('/api/test-types')
-      const data = await response.json()
-      setTestTypes(data)
+      
+      if (response.ok) {
+        const data = await response.json()
+        // Ensure data is an array
+        if (Array.isArray(data)) {
+          setTestTypes(data)
+        } else {
+          console.error('Expected array but got:', data)
+          setTestTypes([])
+        }
+      } else {
+        console.error('Failed to fetch test types:', response.status)
+        setTestTypes([])
+      }
     } catch (error) {
       console.error('Error fetching test types:', error)
+      setTestTypes([])
     } finally {
       setLoading(false)
     }

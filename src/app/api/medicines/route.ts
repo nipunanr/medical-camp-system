@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { getMedicines, addMedicine } from '@/lib/medicineStore'
 
 export async function GET() {
   try {
-    const medicines = await prisma.medicine.findMany({
-      orderBy: { name: 'asc' }
-    })
-    
-    return NextResponse.json(medicines)
+    return NextResponse.json(getMedicines())
   } catch (error) {
     console.error('Error fetching medicines:', error)
     return NextResponse.json(
@@ -21,12 +17,10 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json()
     
-    const medicine = await prisma.medicine.create({
-      data: {
-        name: data.name,
-        dosage: data.dosage || null,
-        stock: data.stock || 0,
-      }
+    const medicine = addMedicine({
+      name: data.name,
+      dosage: data.dosage || '',
+      stock: data.stock || 0
     })
     
     return NextResponse.json(medicine)
