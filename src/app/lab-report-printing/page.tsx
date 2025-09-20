@@ -1,16 +1,13 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { 
-  ArrowLeftIcon, 
   PrinterIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
   CheckIcon,
   ClockIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline'
+import ModernLayout from '@/components/ModernLayout'
 
 interface Patient {
   id: string
@@ -547,36 +544,27 @@ export default function LabReportPrinting() {
   )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-100 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center mb-8">
-          <Link href="/" className="mr-4 p-2 rounded-full bg-white shadow-lg hover:shadow-xl transition-all">
-            <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-              <PrinterIcon className="h-8 w-8 text-teal-600 mr-3" />
-              Lab Report Printing
-            </h1>
-            <p className="text-gray-600">Print official laboratory reports for patients</p>
-          </div>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="flex border-b border-gray-200 mb-6">
-            <button
-              onClick={() => setActiveTab('pending')}
-              className={`px-6 py-3 font-semibold ${
-                activeTab === 'pending'
-                  ? 'border-b-2 border-teal-500 text-teal-600'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <ClockIcon className="h-5 w-5 inline mr-2" />
-              Pending Reports ({filteredPending.length})
-            </button>
+    <ModernLayout 
+      title="Lab Report Printing"
+      subtitle="Print official laboratory reports for patients"
+      showBackButton={true}
+      headerIcon={<PrinterIcon className="h-8 w-8" />}
+      backgroundColor="from-teal-50 to-cyan-100"
+    >
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="flex border-b border-gray-200 mb-6">
+          <button
+            onClick={() => setActiveTab('pending')}
+            className={`px-6 py-3 font-semibold ${
+              activeTab === 'pending'
+                ? 'border-b-2 border-teal-500 text-teal-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <ClockIcon className="h-5 w-5 inline mr-2" />
+            Pending Reports ({filteredPending.length})
+          </button>
             <button
               onClick={() => setActiveTab('completed')}
               className={`px-6 py-3 font-semibold ${
@@ -666,7 +654,6 @@ export default function LabReportPrinting() {
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </ModernLayout>
   )
 }

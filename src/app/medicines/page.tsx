@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { 
-  ArrowLeftIcon, 
   HeartIcon, 
   PlusIcon,
   PencilIcon,
   TrashIcon
 } from '@heroicons/react/24/outline'
+import ModernLayout from '@/components/ModernLayout'
 
 interface Medicine {
   id: string
@@ -139,41 +138,42 @@ export default function MedicinesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-500"></div>
-      </div>
+      <ModernLayout 
+        title="Medicine Management"
+        subtitle="Loading..."
+        showBackButton={true}
+        headerIcon={<HeartIcon className="h-8 w-8" />}
+        backgroundColor="from-red-50 to-rose-100"
+      >
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-500"></div>
+        </div>
+      </ModernLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-100 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center">
-            <Link href="/" className="mr-4 p-2 rounded-full bg-white shadow-lg hover:shadow-xl transition-all">
-              <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                <HeartIcon className="h-8 w-8 text-red-600 mr-3" />
-                Medicine Management
-              </h1>
-              <p className="text-gray-600">Manage medicine inventory and dispensing</p>
-            </div>
-          </div>
-          
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 touch-manipulation flex items-center space-x-2"
-          >
-            <PlusIcon className="h-5 w-5" />
-            <span>Add Medicine</span>
-          </button>
-        </div>
+    <ModernLayout 
+      title="Medicine Management"
+      subtitle="Manage medicine inventory and dispensing"
+      showBackButton={true}
+      headerIcon={<HeartIcon className="h-8 w-8" />}
+      backgroundColor="from-red-50 to-rose-100"
+    >
+      <div className="flex items-center justify-between mb-8">
+        <div></div> {/* Empty div for spacing */}
+        
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 touch-manipulation flex items-center space-x-2"
+        >
+          <PlusIcon className="h-5 w-5" />
+          <span>Add Medicine</span>
+        </button>
+      </div>
 
-        {/* Form Modal */}
-        {showForm && (
+      {/* Form Modal */}
+      {showForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -309,7 +309,6 @@ export default function MedicinesPage() {
             </button>
           </div>
         )}
-      </div>
-    </div>
+    </ModernLayout>
   )
 }

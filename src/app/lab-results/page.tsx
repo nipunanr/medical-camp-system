@@ -1,9 +1,7 @@
 ﻿'use client'
 
 import React, { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { 
-  ArrowLeftIcon, 
   DocumentTextIcon, 
   MagnifyingGlassIcon,
   ChevronDownIcon,
@@ -12,6 +10,7 @@ import {
   XMarkIcon,
   PencilIcon
 } from '@heroicons/react/24/outline'
+import ModernLayout from '@/components/ModernLayout'
 
 interface Patient {
   id: string
@@ -179,34 +178,26 @@ export default function LabResults() {
   ) : 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 to-amber-100 p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center mb-8">
-          <Link href="/" className="mr-4 p-2 rounded-full bg-white shadow-lg hover:shadow-xl transition-all">
-            <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-              <DocumentTextIcon className="h-8 w-8 text-yellow-600 mr-3" />
-              Lab Results Entry
-            </h1>
-            <p className="text-gray-600">Enhanced lab results with pending tests and search</p>
-          </div>
-        </div>
-
-        {/* Pending Results Section */}
-        <div className="bg-white rounded-2xl shadow-xl mb-6">
-          <button
-            onClick={() => setShowPending(!showPending)}
-            className="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 rounded-t-2xl"
-          >
-            <div className="flex items-center">
-              <div className="h-8 w-8 text-yellow-600 mr-3">
-                {showPending ? <ChevronDownIcon /> : <ChevronRightIcon />}
-              </div>
-              <h2 className="text-xl font-semibold text-gray-800">
-                Pending Test Results
-                {pendingCount > 0 && (
+    <ModernLayout 
+      title="Lab Results Entry"
+      subtitle="Enhanced lab results with pending tests and search"
+      showBackButton={true}
+      headerIcon={<DocumentTextIcon className="h-8 w-8" />}
+      backgroundColor="from-yellow-50 to-amber-100"
+    >
+      {/* Pending Results Section */}
+      <div className="bg-white rounded-2xl shadow-xl mb-6">
+        <button
+          onClick={() => setShowPending(!showPending)}
+          className="w-full p-6 flex items-center justify-between text-left hover:bg-gray-50 rounded-t-2xl"
+        >
+          <div className="flex items-center">
+            <div className="h-8 w-8 text-yellow-600 mr-3">
+              {showPending ? <ChevronDownIcon /> : <ChevronRightIcon />}
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800">
+              Pending Test Results
+              {pendingCount > 0 && (
                   <span className="ml-2 px-2 py-1 bg-red-100 text-red-600 text-sm rounded-full">
                     {pendingCount} pending
                   </span>
@@ -417,8 +408,7 @@ export default function LabResults() {
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </ModernLayout>
   )
 }
 

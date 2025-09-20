@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeftIcon, UserPlusIcon, PrinterIcon, HeartIcon, CheckIcon } from '@heroicons/react/24/outline'
+import { UserPlusIcon, PrinterIcon, HeartIcon, CheckIcon } from '@heroicons/react/24/outline'
+import ModernLayout from '@/components/ModernLayout'
 
 interface TestType {
   id: string
@@ -178,61 +179,23 @@ export default function RegistrationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
-      {/* Modern Header */}
-      <header className="bg-white/90 backdrop-blur-sm shadow-lg border-b-4 border-red-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center shadow-lg">
-                <div className="text-white font-bold text-sm">SC</div>
+    <ModernLayout 
+      title="Patient Registration"
+      subtitle="Register new patients for medical camp services"
+      showBackButton={true}
+      headerIcon={<UserPlusIcon className="h-8 w-8" />}
+      backgroundColor="from-red-50 via-orange-50 to-yellow-50"
+    >
+      {!registrationComplete ? (
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-10 border border-red-100">
+          {/* Personal Information */}
+          <div className="mb-10">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                <HeartIcon className="h-5 w-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-red-700 to-red-900 bg-clip-text text-transparent">
-                  St. Sebastian&apos;s Church
-                </h1>
-                <p className="text-xs text-gray-600 font-medium">Medical Camp System</p>
-              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
             </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Page Header */}
-      <div className="bg-white/60 backdrop-blur-sm border-b border-red-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center space-x-6">
-            <Link 
-              href="/"
-              className="p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 border border-red-100 hover:border-red-200"
-            >
-              <ArrowLeftIcon className="h-6 w-6 text-red-600" />
-            </Link>
-            
-            <div className="flex items-center space-x-4">
-              <div className="p-4 bg-gradient-to-br from-red-500 to-red-700 rounded-2xl shadow-lg">
-                <UserPlusIcon className="h-8 w-8 text-white" />
-              </div>
-              <div>
-                <h2 className="text-4xl font-bold text-gray-900 mb-2">Patient Registration</h2>
-                <p className="text-lg text-gray-600 font-medium">Register new patients for medical camp services</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {!registrationComplete ? (
-          <form onSubmit={handleSubmit} className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-10 border border-red-100">
-            {/* Personal Information */}
-            <div className="mb-10">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                  <HeartIcon className="h-5 w-5 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
-              </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <label className="block text-sm font-semibold text-gray-800 mb-3">Full Name *</label>
@@ -508,7 +471,6 @@ export default function RegistrationPage() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </ModernLayout>
   )
 }

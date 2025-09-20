@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { 
-  ArrowLeftIcon, 
   ClipboardDocumentCheckIcon, 
   PlusIcon,
   PencilIcon,
   TrashIcon
 } from '@heroicons/react/24/outline'
+import ModernLayout from '@/components/ModernLayout'
 
 interface TestType {
   id: string
@@ -144,38 +143,39 @@ export default function TestTypesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500"></div>
-      </div>
+      <ModernLayout 
+        title="Test Type Master"
+        subtitle="Loading..."
+        showBackButton={true}
+        headerIcon={<ClipboardDocumentCheckIcon className="h-8 w-8" />}
+        backgroundColor="from-green-50 to-emerald-100"
+      >
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500"></div>
+        </div>
+      </ModernLayout>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center">
-            <Link href="/" className="mr-4 p-2 rounded-full bg-white shadow-lg hover:shadow-xl transition-all">
-              <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                <ClipboardDocumentCheckIcon className="h-8 w-8 text-green-600 mr-3" />
-                Test Type Master
-              </h1>
-              <p className="text-gray-600">Manage available medical tests and configurations</p>
-            </div>
-          </div>
-          
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 touch-manipulation flex items-center space-x-2"
-          >
-            <PlusIcon className="h-5 w-5" />
-            <span>Add Test Type</span>
-          </button>
-        </div>
+    <ModernLayout 
+      title="Test Type Master"
+      subtitle="Manage available medical tests and configurations"
+      showBackButton={true}
+      headerIcon={<ClipboardDocumentCheckIcon className="h-8 w-8" />}
+      backgroundColor="from-green-50 to-emerald-100"
+    >
+      <div className="flex items-center justify-between mb-8">
+        <div></div> {/* Empty div for spacing */}
+        
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 touch-manipulation flex items-center space-x-2"
+        >
+          <PlusIcon className="h-5 w-5" />
+          <span>Add Test Type</span>
+        </button>
+      </div>
 
         {/* Form Modal */}
         {showForm && (
@@ -329,7 +329,6 @@ export default function TestTypesPage() {
             </button>
           </div>
         )}
-      </div>
-    </div>
+    </ModernLayout>
   )
 }

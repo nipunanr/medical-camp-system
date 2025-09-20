@@ -1,8 +1,8 @@
 'use client'
 
-import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { ArrowLeftIcon, BeakerIcon, QrCodeIcon, MagnifyingGlassIcon, PlusIcon, MinusIcon, ChevronDownIcon, ChevronRightIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline'
+import { BeakerIcon, QrCodeIcon, MagnifyingGlassIcon, PlusIcon, MinusIcon, ChevronDownIcon, ChevronRightIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline'
+import ModernLayout from '@/components/ModernLayout'
 
 interface Patient {
   id: string
@@ -307,36 +307,27 @@ export default function MedicineIssuePage() {
   const selectedMedicine = medicines.find(m => m.id === medicineForm.medicineId)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-violet-100 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center mb-8">
-          <Link href="/" className="mr-4 p-2 rounded-full bg-white shadow-lg hover:shadow-xl transition-all">
-            <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
-          </Link>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-              <BeakerIcon className="h-8 w-8 text-purple-600 mr-3" />
-              Medicine Issue
-            </h1>
-            <p className="text-gray-600">Scan QR codes and dispense medicines to patients</p>
+    <ModernLayout 
+      title="Medicine Issue"
+      subtitle="Scan QR codes and dispense medicines to patients"
+      showBackButton={true}
+      headerIcon={<BeakerIcon className="h-8 w-8" />}
+      backgroundColor="from-purple-50 to-violet-100"
+    >
+      {/* All Medicine Issues - Collapsible Section */}
+      <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+        <button
+          onClick={fetchAllMedicineIssues}
+          disabled={loadingAllIssues}
+          className="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors disabled:opacity-50"
+        >
+          <div className="flex items-center">
+            <ClipboardDocumentListIcon className="h-6 w-6 text-purple-600 mr-3" />
+            <span className="text-lg font-semibold text-gray-800">
+              {loadingAllIssues ? 'Loading...' : `All Medicine Issues (${allMedicineIssues.length})`}
+            </span>
           </div>
-        </div>
-
-        {/* All Medicine Issues - Collapsible Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
-          <button
-            onClick={fetchAllMedicineIssues}
-            disabled={loadingAllIssues}
-            className="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors disabled:opacity-50"
-          >
-            <div className="flex items-center">
-              <ClipboardDocumentListIcon className="h-6 w-6 text-purple-600 mr-3" />
-              <span className="text-lg font-semibold text-gray-800">
-                {loadingAllIssues ? 'Loading...' : `All Medicine Issues (${allMedicineIssues.length})`}
-              </span>
-            </div>
-            {showAllIssues ? (
+          {showAllIssues ? (
               <ChevronDownIcon className="h-5 w-5 text-purple-600" />
             ) : (
               <ChevronRightIcon className="h-5 w-5 text-purple-600" />
@@ -765,7 +756,6 @@ export default function MedicineIssuePage() {
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </ModernLayout>
   )
 }

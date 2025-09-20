@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { ArrowLeftIcon, MagnifyingGlassIcon, UserIcon, PencilIcon, CheckIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, UserIcon, PencilIcon, CheckIcon } from '@heroicons/react/24/outline'
+import ModernLayout from '@/components/ModernLayout'
 
 interface Patient {
   id: string
@@ -220,33 +220,15 @@ export default function PatientUpdatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
-      {/* Compact Header */}
-      <header className="bg-white shadow-lg border-b-4 border-red-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <Link href="/" className="flex items-center space-x-2 text-red-600 hover:text-red-700">
-                <ArrowLeftIcon className="h-5 w-5" />
-                <span className="font-medium">Back to Dashboard</span>
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center">
-                <div className="text-white font-bold text-sm">SC</div>
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-gray-900">Update Patient Details</h1>
-                <p className="text-sm text-red-600">Search and modify patient information</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
+    <ModernLayout 
+      title="Update Patient Details"
+      subtitle="Search and modify patient information"
+      showBackButton={true}
+      headerIcon={<MagnifyingGlassIcon className="h-8 w-8" />}
+      backgroundColor="from-red-50 via-orange-50 to-yellow-50"
+    >
+      {/* Search Section */}
+      <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
           <div className="flex items-center space-x-4 mb-6">
             <MagnifyingGlassIcon className="h-8 w-8 text-blue-600" />
             <h2 className="text-2xl font-bold text-gray-900">Patient List</h2>
@@ -547,7 +529,6 @@ export default function PatientUpdatePage() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+    </ModernLayout>
   )
 }
