@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { ArrowLeftIcon, BeakerIcon, QrCodeIcon, MagnifyingGlassIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, BeakerIcon, QrCodeIcon, MagnifyingGlassIcon, PlusIcon, MinusIcon, ChevronDownIcon, ChevronRightIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline'
 
 interface Patient {
   id: string
@@ -70,6 +70,9 @@ export default function MedicineIssuePage() {
   const [registration, setRegistration] = useState<Registration | null>(null)
   const [medicines, setMedicines] = useState<Medicine[]>([])
   const [issuedMedicines, setIssuedMedicines] = useState<IssuedMedicine[]>([])
+  const [allMedicineIssues, setAllMedicineIssues] = useState<IssuedMedicine[]>([])
+  const [showAllIssues, setShowAllIssues] = useState(false)
+  const [loadingAllIssues, setLoadingAllIssues] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [issuingMedicine, setIssuingMedicine] = useState(false)
@@ -108,6 +111,22 @@ export default function MedicineIssuePage() {
     fetchMedicines()
   }, [])
 
+  // Fetch initial count of all medicine issues for display
+  useEffect(() => {
+    const fetchInitialCount = async () => {
+      try {
+        const response = await fetch('/api/medicine-issues')
+        if (response.ok) {
+          const data = await response.json()
+          setAllMedicineIssues(data.medicineIssues || [])
+        }
+      } catch (err) {
+        console.error('Error fetching initial medicine issues count:', err)
+      }
+    }
+    fetchInitialCount()
+  }, [])
+
   const fetchIssuedMedicines = async (regId: string) => {
     try {
       console.log('Fetching issued medicines for registration:', regId)
@@ -121,6 +140,29 @@ export default function MedicineIssuePage() {
       }
     } catch (err) {
       console.error('Error fetching issued medicines:', err)
+    }
+  }
+
+  const fetchAllMedicineIssues = async () => {
+    if (allMedicineIssues.length > 0) {
+      setShowAllIssues(!showAllIssues)
+      return
+    }
+
+    setLoadingAllIssues(true)
+    try {
+      const response = await fetch('/api/medicine-issues')
+      if (response.ok) {
+        const data = await response.json()
+        setAllMedicineIssues(data.medicineIssues || [])
+        setShowAllIssues(true)
+      } else {
+        console.error('Failed to fetch all medicine issues:', response.status)
+      }
+    } catch (err) {
+      console.error('Error fetching all medicine issues:', err)
+    } finally {
+      setLoadingAllIssues(false)
     }
   }
 
@@ -234,6 +276,17 @@ export default function MedicineIssuePage() {
         }
         // Refresh issued medicines list
         fetchIssuedMedicines(registration.id)
+        
+        // Refresh all medicine issues list to update the count
+        try {
+          const allIssuesResponse = await fetch('/api/medicine-issues')
+          if (allIssuesResponse.ok) {
+            const allIssuesData = await allIssuesResponse.json()
+            setAllMedicineIssues(allIssuesData.medicineIssues || [])
+          }
+        } catch (err) {
+          console.error('Error refreshing all medicine issues:', err)
+        }
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Error issuing medicine')
@@ -268,6 +321,69 @@ export default function MedicineIssuePage() {
             </h1>
             <p className="text-gray-600">Scan QR codes and dispense medicines to patients</p>
           </div>
+        </div>
+
+        {/* All Medicine Issues - Collapsible Section */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+          <button
+            onClick={fetchAllMedicineIssues}
+            disabled={loadingAllIssues}
+            className="w-full flex items-center justify-between p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors disabled:opacity-50"
+          >
+            <div className="flex items-center">
+              <ClipboardDocumentListIcon className="h-6 w-6 text-purple-600 mr-3" />
+              <span className="text-lg font-semibold text-gray-800">
+                {loadingAllIssues ? 'Loading...' : `All Medicine Issues (${allMedicineIssues.length})`}
+              </span>
+            </div>
+            {showAllIssues ? (
+              <ChevronDownIcon className="h-5 w-5 text-purple-600" />
+            ) : (
+              <ChevronRightIcon className="h-5 w-5 text-purple-600" />
+            )}
+          </button>
+
+          {showAllIssues && (
+            <div className="mt-6 space-y-4 max-h-96 overflow-y-auto">
+              {allMedicineIssues.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No medicine issues found</p>
+              ) : (
+                allMedicineIssues.map((issue) => (
+                  <div key={issue.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">
+                          {issue.medicine?.name || issue.customMedicine}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          Registration ID: {issue.registrationId}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium">
+                          Qty: {issue.quantity}
+                        </span>
+                      </div>
+                    </div>
+                    {issue.dosage && (
+                      <p className="text-sm text-gray-700 mb-2">
+                        <strong>Dosage:</strong> {issue.dosage}
+                      </p>
+                    )}
+                    {issue.instructions && (
+                      <p className="text-sm text-gray-700 mb-2">
+                        <strong>Instructions:</strong> {issue.instructions}
+                      </p>
+                    )}
+                    <div className="flex justify-between items-center text-xs text-gray-500">
+                      <span>Issued by: {issue.issuedBy}</span>
+                      <span>{new Date(issue.issuedAt).toLocaleString()}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
 
         {/* QR Scanner Section */}

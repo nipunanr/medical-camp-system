@@ -121,14 +121,46 @@ export default function HomePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/registration', {
+        // Fetch unique patients count
+        const patientsResponse = await fetch('/api/patients/search?q=&limit=0', {
           cache: 'no-store'
         });
         
-        if (response.ok) {
-          const registrations = await response.json();
-          setTotalPatients(registrations.length || 0);
+        if (patientsResponse.ok) {
+          const patientsData = await patientsResponse.json();
+          if (patientsData.success) {
+            setTotalPatients(patientsData.patients?.length || 0);
+          }
         }
+
+        // Fetch completed test results
+        const testResultsResponse = await fetch('/api/test-results?limit=1000', {
+          cache: 'no-store'
+        });
+        
+        if (testResultsResponse.ok) {
+          const testData = await testResultsResponse.json();
+          setCompletedTests(testData.testResults?.length || 0);
+        }
+
+        // Fetch medicine issues (dispensed medicines)
+        try {
+          const medicineIssuesResponse = await fetch('/api/medicine-issues?limit=1000', {
+            cache: 'no-store'
+          });
+          
+          if (medicineIssuesResponse.ok) {
+            const medicineIssuesData = await medicineIssuesResponse.json();
+            // Sum up all quantities of dispensed medicines
+            const totalDispensed = medicineIssuesData.medicineIssues?.reduce((sum: number, issue: any) => {
+              return sum + (issue.quantity || 0);
+            }, 0) || 0;
+            setMedicinesDispensed(totalDispensed);
+          }
+        } catch (medicineError) {
+          console.log('Medicine issues data not available yet');
+        }
+
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -149,12 +181,16 @@ export default function HomePage() {
           <div className="flex items-center justify-between h-16">
             {/* Logo and Title */}
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-800 rounded-full flex items-center justify-center shadow-lg">
-                <div className="text-white font-bold text-lg">SC</div>
+              <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg overflow-hidden">
+                <img 
+                  src="/church-logo.png" 
+                  alt="St. Sebastian's Church Logo" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">St. Sebastian&apos;s Church</h1>
-                <p className="text-sm text-red-600 font-semibold">Free Medical Camp - Today Only (7AM - 5PM)</p>
+                <h1 className="text-xl font-bold text-gray-900">Medical Camp | 2025</h1>
+                <p className="text-sm text-red-600 font-semibold">St. Sebastian&apos;s Church - Moragoda</p>
               </div>
             </div>
             
@@ -170,7 +206,7 @@ export default function HomePage() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">{medicinesDispensed}</div>
-                <div className="text-xs text-gray-600 uppercase">Medicines</div>
+                <div className="text-xs text-gray-600 uppercase">Dispensed</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-gray-800">{currentTime.toLocaleTimeString()}</div>
@@ -187,7 +223,7 @@ export default function HomePage() {
           
           {/* Hourly Analytics Dashboard */}
           <div className="mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Today&apos;s Medical Camp Dashboard</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Medical Camp 2025 - Dashboard</h2>
             
             {/* Analytics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -228,7 +264,7 @@ export default function HomePage() {
                     <p className="text-3xl font-bold text-blue-600">
                       {loading ? '...' : medicinesDispensed}
                     </p>
-                    <p className="text-sm text-gray-500">{medicinesDispensed > 0 ? 'Medicines issued' : 'No medicines dispensed yet'}</p>
+                    <p className="text-sm text-gray-500">{medicinesDispensed > 0 ? 'Total quantity issued' : 'No medicines dispensed yet'}</p>
                   </div>
                   <div className="p-3 bg-blue-100 rounded-full">
                     <HeartIcon className="h-8 w-8 text-blue-600" />

@@ -5,6 +5,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const query = searchParams.get('q')
+    const limitParam = searchParams.get('limit')
+    const limit = limitParam ? parseInt(limitParam) : 50 // Default to 50, but allow override
     
     let patients;
     
@@ -25,7 +27,7 @@ export async function GET(request: NextRequest) {
         orderBy: {
           createdAt: 'desc'
         },
-        take: 50 // Limit to 50 patients for performance
+        take: limit > 0 ? limit : undefined // If limit is 0 or negative, get all
       })
     } else {
       // Search patients by name, contact number, patient ID, or registration ID
@@ -55,7 +57,7 @@ export async function GET(request: NextRequest) {
             }
           }
         },
-        take: 10 // Limit results
+        take: limit > 0 ? Math.min(limit, 10) : 10 // For search queries, still limit for performance, but respect the limit parameter
       })
     }
 
