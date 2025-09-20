@@ -513,7 +513,7 @@ export default function LabReportPrinting() {
 
         <div class="footer">
           A Social Service of Medical Camp System
-          <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${encodeURIComponent(`Patient ID: ${patient.id || 'N/A'} | Date: ${new Date().toLocaleDateString('en-GB')} | Lab Report`)}" alt="QR Code" />
+          <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${encodeURIComponent(`${patient.id || 'N/A'}`)}" alt="QR Code" />
         </div>
 
         <div class="no-print" style="margin-top: 20px; text-align: center;">

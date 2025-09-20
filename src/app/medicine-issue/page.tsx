@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { BeakerIcon, QrCodeIcon, MagnifyingGlassIcon, PlusIcon, MinusIcon, ChevronDownIcon, ChevronRightIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect, useRef } from 'react'
+import { BeakerIcon, QrCodeIcon, MagnifyingGlassIcon, PlusIcon, MinusIcon, ChevronDownIcon, ChevronRightIcon, ClipboardDocumentListIcon, CameraIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import ModernLayout from '@/components/ModernLayout'
+import jsQR from 'jsqr'
 
 interface Patient {
   id: string
@@ -78,6 +79,14 @@ export default function MedicineIssuePage() {
   const [issuingMedicine, setIssuingMedicine] = useState(false)
   const [issueSuccess, setIssueSuccess] = useState(false)
   
+  // Camera scanning states
+  const [showCamera, setShowCamera] = useState(false)
+  const [cameraError, setCameraError] = useState('')
+  const [isScanning, setIsScanning] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+  
   const [medicineForm, setMedicineForm] = useState<MedicineIssueForm>({
     medicineId: '',
     customMedicine: '',
@@ -125,6 +134,15 @@ export default function MedicineIssuePage() {
       }
     }
     fetchInitialCount()
+  }, [])
+
+  // Cleanup camera stream on component unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+      }
+    }
   }, [])
 
   const fetchIssuedMedicines = async (regId: string) => {
@@ -298,6 +316,99 @@ export default function MedicineIssuePage() {
     }
   }
 
+  // Camera scanning functions
+  const startCamera = async () => {
+    try {
+      setCameraError('')
+      setShowCamera(true)
+      
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          facingMode: 'environment', // Use back camera if available
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      })
+      
+      streamRef.current = stream
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        videoRef.current.play()
+      }
+      
+      setIsScanning(true)
+    } catch (err) {
+      setCameraError('Failed to access camera. Please check permissions.')
+      console.error('Camera error:', err)
+    }
+  }
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+    setShowCamera(false)
+    setIsScanning(false)
+    setCameraError('')
+  }
+
+  const captureAndAnalyze = async () => {
+    if (!videoRef.current || !canvasRef.current) return
+
+    const video = videoRef.current
+    const canvas = canvasRef.current
+    const context = canvas.getContext('2d')
+
+    if (!context) return
+
+    // Set canvas size to match video
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+
+    // Draw current video frame to canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height)
+
+    // Get image data for QR code detection
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+    
+    // Use jsQR to detect QR codes
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: "dontInvert",
+    })
+
+    if (code) {
+      console.log('QR Code detected:', code.data)
+      
+      // Visual feedback for successful detection
+      setCameraError('')
+      setRegistrationId(code.data)
+      
+      // Show success message briefly
+      setCameraError('✅ QR Code detected successfully!')
+      
+      setTimeout(() => {
+        stopCamera()
+        // Auto-search after QR detection
+        handleSearch()
+      }, 1000) // Give user time to see the success message
+    }
+  }
+
+  // Remove the simulate function since we're using real QR detection now
+
+  // Auto-capture every second when camera is active for better QR detection
+  useEffect(() => {
+    if (isScanning) {
+      const interval = setInterval(() => {
+        captureAndAnalyze()
+      }, 1000) // Increased frequency to 1 second for better detection
+      
+      return () => clearInterval(interval)
+    }
+  }, [isScanning])
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch()
@@ -401,7 +512,95 @@ export default function MedicineIssuePage() {
               <MagnifyingGlassIcon className="h-5 w-5" />
               <span>{loading ? 'Searching...' : 'Search'}</span>
             </button>
+            <button
+              onClick={showCamera ? stopCamera : startCamera}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 touch-manipulation flex items-center space-x-2"
+            >
+              <CameraIcon className="h-5 w-5" />
+              <span>{showCamera ? 'Stop' : 'Scan QR'}</span>
+            </button>
           </div>
+
+          {/* Camera Modal */}
+          {showCamera && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-2xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">QR Code Scanner</h3>
+                  <button
+                    onClick={stopCamera}
+                    className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
+                  >
+                    <XMarkIcon className="h-6 w-6" />
+                  </button>
+                </div>
+                
+                {cameraError && (
+                  <div className={`border rounded-xl p-4 mb-4 ${
+                    cameraError.includes('✅') 
+                      ? 'bg-green-50 border-green-200' 
+                      : 'bg-red-50 border-red-200'
+                  }`}>
+                    <p className={cameraError.includes('✅') ? 'text-green-600' : 'text-red-600'}>
+                      {cameraError}
+                    </p>
+                    {!cameraError.includes('✅') && (
+                      <button
+                        onClick={startCamera}
+                        className="mt-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg"
+                      >
+                        Try Again
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {showCamera && !cameraError?.includes('✅') && (
+                  <div className="relative">
+                    <video
+                      ref={videoRef}
+                      className="w-full h-64 bg-black rounded-lg object-cover"
+                      playsInline
+                      muted
+                    />
+                    <canvas
+                      ref={canvasRef}
+                      className="hidden"
+                    />
+                    
+                    {/* Scanning overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="border-2 border-green-500 bg-green-500 bg-opacity-20 rounded-lg w-48 h-48 flex items-center justify-center">
+                        <QrCodeIcon className="h-16 w-16 text-green-500" />
+                      </div>
+                    </div>
+                    
+                    {isScanning && (
+                      <div className="absolute top-4 left-4 bg-green-600 text-white px-3 py-1 rounded-full text-sm">
+                        Scanning...
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <div className="mt-4 space-y-2">
+                  <p className="text-sm text-gray-600">
+                    📱 Position the QR code within the green square for automatic detection
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    💡 Tip: Hold steady and ensure good lighting for best results
+                  </p>
+                  <button
+                    onClick={captureAndAnalyze}
+                    disabled={!isScanning}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"
+                  >
+                    📸 Manual Capture & Analyze
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
