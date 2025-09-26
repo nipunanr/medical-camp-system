@@ -23,7 +23,7 @@ A comprehensive web-based solution for managing medical camps with registration,
 
 - **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes
-- **Database**: SQLite with Prisma ORM
+- **Database**: MariaDB/MySQL with Prisma ORM
 - **UI Components**: Headless UI, Heroicons
 - **QR/Barcode**: qrcode, jsbarcode libraries
 - **Deployment**: Vercel
@@ -43,9 +43,9 @@ A comprehensive web-based solution for managing medical camps with registration,
 
 3. **Set up environment variables**
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env
    ```
-   Edit `.env.local` and configure your database connection and other settings.
+   Edit `.env` and configure your MariaDB database connection and other settings.
 
 4. **Set up the database**
    ```bash
@@ -64,7 +64,7 @@ A comprehensive web-based solution for managing medical camps with registration,
 
 ## Environment Configuration
 
-The system uses environment variables for configuration. Copy `.env.example` to `.env.local` and update the values:
+The system uses environment variables for configuration. Copy `.env.example` to `.env` and update the values:
 
 ### Required Variables
 - `DATABASE_URL`: PostgreSQL/Supabase database connection string
@@ -82,7 +82,7 @@ The system includes a built-in maintenance mode feature:
 
 ### Enabling Maintenance Mode
 1. **Via Settings**: Go to `/settings` → System Actions → Toggle "Enable Maintenance"
-2. **Via Environment**: Set `NEXT_PUBLIC_MAINTENANCE_MODE=true` in `.env.local`
+2. **Via Environment**: Set `NEXT_PUBLIC_MAINTENANCE_MODE=true` in `.env`
 3. **Via API**: POST to `/api/maintenance` with `{"maintenanceMode": true}`
 
 ### Features

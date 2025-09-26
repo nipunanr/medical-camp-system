@@ -15,10 +15,10 @@ export async function POST(request: NextRequest) {
   try {
     const { maintenanceMode } = await request.json()
     
-    // Path to .env.local file
-    const envPath = path.join(process.cwd(), '.env.local')
+    // Path to .env file
+    const envPath = path.join(process.cwd(), '.env')
     
-    // Read current .env.local content
+    // Read current .env content
     let envContent = ''
     if (fs.existsSync(envPath)) {
       envContent = fs.readFileSync(envPath, 'utf8')

@@ -6,7 +6,7 @@ The Medical Camp System includes a built-in maintenance mode feature that allows
 ## How It Works
 
 ### Environment Variable Control
-The maintenance mode is controlled by the `NEXT_PUBLIC_MAINTENANCE_MODE` environment variable in your `.env.local` file:
+The maintenance mode is controlled by the `NEXT_PUBLIC_MAINTENANCE_MODE` environment variable in your `.env` file:
 
 ```env
 # Enable maintenance mode
@@ -27,11 +27,11 @@ NEXT_PUBLIC_MAINTENANCE_MODE=false
 1. Navigate to `/settings` in your application
 2. Scroll to the "System Actions" section
 3. Use the "Maintenance Mode" toggle
-4. The system will automatically update the `.env.local` file
+4. The system will automatically update the `.env` file
 5. **Important**: Restart the server for changes to take effect
 
 ### Method 2: Manual Environment Variable
-1. Edit the `.env.local` file in your project root
+1. Edit the `.env` file in your project root
 2. Set `NEXT_PUBLIC_MAINTENANCE_MODE=true` or `NEXT_PUBLIC_MAINTENANCE_MODE=false`
 3. Save the file
 4. Restart your development server (`npm run dev`)
@@ -95,7 +95,7 @@ You can extend the `MaintenanceWrapper` component in `/src/components/Maintenanc
 ## Troubleshooting
 
 ### Maintenance Mode Not Working
-1. Check that `.env.local` exists and contains the correct variable
+1. Check that `.env` exists and contains the correct variable
 2. Verify the server has been restarted after environment changes
 3. Clear browser cache and refresh the page
 
@@ -105,6 +105,6 @@ You can extend the `MaintenanceWrapper` component in `/src/components/Maintenanc
 3. Verify the MaintenanceWrapper is properly imported in the layout
 
 ### Cannot Access Settings to Disable
-1. Manually edit `.env.local` to set `NEXT_PUBLIC_MAINTENANCE_MODE=false`
+1. Manually edit `.env` to set `NEXT_PUBLIC_MAINTENANCE_MODE=false`
 2. Restart the server
 3. Navigate to `/settings` to use the toggle interface
